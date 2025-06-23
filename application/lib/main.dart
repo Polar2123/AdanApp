@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:application/API/APIHandler.dart';
+import 'package:application/API/PrayerSchedule.dart';
 import 'package:flutter/material.dart';
 
 
@@ -63,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _hour = 0;
   int _minute = 0;
   int _second = 0;
-
+  late Future<PrayerSchedule> futurePrayerSchedule;
   Timer? timer;
 
   @override
@@ -75,6 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
         _second = DateTime.timestamp().second;
       });
     });
+    futurePrayerSchedule = APIHandler().fetchPrayerTimes();
     super.initState();
   }
 
@@ -135,6 +138,18 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(
                 '${_hour.toString().padLeft(2,'0')}:${_minute.toString().padLeft(2,'0')}:${_second.toString().padLeft(2,'0')}',
               style: TextStyle(fontWeight: FontWeight.bold)
+            ),
+            FutureBuilder<PrayerSchedule>(
+              future: futurePrayerSchedule,
+              builder: (context,snapshot){
+                if (snapshot.hasData) {
+                  return Text(snapshot.data!.data["timings"]["Fajr"]);
+                }
+                else{
+                  return Text("Could not find prayer times.");
+                }
+
+              }
             )
           ],
         ),

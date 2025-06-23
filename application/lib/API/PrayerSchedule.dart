@@ -1,24 +1,17 @@
 
 class PrayerSchedule{
-  final String Fajr;
-  final String Sunrise;
-  final String Dhuhr;
-  final String Asr;
-  final String Sunset;
+  final Map<String,dynamic> data;
 
-  PrayerSchedule({required this.Fajr, required this.Sunrise, required this.Dhuhr, required this.Asr, required this.Sunset});
+
+  PrayerSchedule({required this.data});
 
   factory PrayerSchedule.fromJson(Map<String, dynamic> json) {
     return switch (json) {
-      {'Fajr': String Fajr, 'Sunrise': String Sunrise, 'Dhuhr': String Dhuhr, 'Asr': String Asr, 'Sunset': String Sunset} =>
+      {'data': Map<String,dynamic> data} =>
           PrayerSchedule(
-              Fajr: Fajr,
-              Sunrise: Sunrise,
-              Dhuhr: Dhuhr,
-              Asr: Asr,
-              Sunset: Sunset
+              data: data
           ),
-      _ => throw const FormatException('Failed to load album.'),
+      _ => throw const FormatException('Failed to load prayer times.'),
     };
   }
 
