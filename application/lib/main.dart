@@ -1,7 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
+
 void main() {
-  runApp(const MyApp());
+  runApp(
+    const MyApp(),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -11,7 +15,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'AdanApp',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -30,10 +34,11 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'AdanApp'),
     );
   }
 }
+
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -55,16 +60,28 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  int _hour = 0;
+  int _minute = 0;
+  int _second = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+  Timer? timer;
+
+  @override
+  void initState() {
+    timer = Timer.periodic(Duration(seconds: 1), (_) {
+      setState(() {
+        _hour = DateTime.timestamp().hour;
+        _minute = DateTime.timestamp().minute;
+        _second = DateTime.timestamp().second;
+      });
     });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -83,7 +100,11 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text(
+            widget.title,
+          style: TextStyle(fontFamily: 'appleChancery'),
+        ),
+
       ),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
@@ -104,19 +125,20 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('Your current time: ${DateTime.timestamp().hour}:${DateTime.timestamp().minute}:${DateTime.timestamp().second}'),
             Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+              'Next Prayer Time',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                  height: 5, fontSize: 20
+              ),
             ),
+            Text(
+                '${_hour.toString().padLeft(2,'0')}:${_minute.toString().padLeft(2,'0')}:${_second.toString().padLeft(2,'0')}',
+              style: TextStyle(fontWeight: FontWeight.bold)
+            )
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      )// This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
