@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:application/API/APIHandler.dart';
-import 'package:application/API/PrayerSchedule.dart';
 import 'package:flutter/material.dart';
 
 
@@ -61,24 +60,48 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-  int _hour = 0;
-  int _minute = 0;
-  int _second = 0;
-  late Future<PrayerSchedule> futurePrayerSchedule;
+  DateTime _currentTime = DateTime.now();
   Timer? timer;
+  late Future<DateTime> futureNextPrayer;
+  DateTime? _nextPrayer;
+
 
   @override
   void initState() {
+
+    _loadNextPrayer();
+
     timer = Timer.periodic(Duration(seconds: 1), (_) {
       setState(() {
-        _hour = DateTime.timestamp().hour;
-        _minute = DateTime.timestamp().minute;
-        _second = DateTime.timestamp().second;
+        _currentTime = DateTime.now();
+        try{
+        if(_nextPrayer != null ) {
+          if(_nextPrayer!.isBefore(_currentTime)){
+          futureNextPrayer = APIHandler().getNextPrayerTime();
+          }
+        }
+        }
+        catch (Exception){
+
+            }
       });
     });
-    futurePrayerSchedule = APIHandler().fetchPrayerTimes();
+
+
     super.initState();
+  }
+
+  Future<void> _loadNextPrayer() async{
+
+    try {
+      final nextPrayer = await APIHandler().getNextPrayerTime();
+      setState(() {
+        _nextPrayer = nextPrayer;
+      });
+    } catch (e) {
+      print('Failed to fetch next prayer time: $e');
+    }
+
   }
 
   @override
@@ -135,23 +158,19 @@ class _MyHomePageState extends State<MyHomePage> {
                   height: 5, fontSize: 20
               ),
             ),
-            Text(
-                '${_hour.toString().padLeft(2,'0')}:${_minute.toString().padLeft(2,'0')}:${_second.toString().padLeft(2,'0')}',
-              style: TextStyle(fontWeight: FontWeight.bold)
-            ),
-            FutureBuilder<PrayerSchedule>(
-              future: futurePrayerSchedule,
-              builder: (context,snapshot){
-                if (snapshot.hasData) {
-                  return Text(snapshot.data!.data["timings"]["Fajr"]);
-                }
-                else{
-                  return Text("Could not find prayer times.");
-                }
 
-              }
+          _nextPrayer != null ?
+            Text(
+                '${_nextPrayer!.difference(_currentTime).inHours}:'
+                    '${(_nextPrayer!.difference(_currentTime).inMinutes%60).toString().padLeft(2,'0')}:'
+                    '${(_nextPrayer!.difference(_currentTime).inSeconds%60).toString().padLeft(2,'0')}',
+              style: TextStyle(fontWeight: FontWeight.bold)
             )
+          :
+          Text('No prayer time found.')
+
           ],
+
         ),
       )// This trailing comma makes auto-formatting nicer for build methods.
     );
