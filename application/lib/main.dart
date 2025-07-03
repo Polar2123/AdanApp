@@ -64,12 +64,13 @@ class _MyHomePageState extends State<MyHomePage> {
   Timer? timer;
   late Future<DateTime> futureNextPrayer;
   DateTime? _nextPrayer;
-
+  String _currentAyah = 'No ayah is currently available.';
 
   @override
   void initState() {
 
     _loadNextPrayer();
+    _loadAyah();
 
     timer = Timer.periodic(Duration(seconds: 1), (_) {
       setState(() {
@@ -78,6 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
         if(_nextPrayer != null ) {
           if(_nextPrayer!.isBefore(_currentTime)){
           futureNextPrayer = APIHandler().getNextPrayerTime();
+          _loadAyah();
           }
         }
         }
@@ -102,6 +104,17 @@ class _MyHomePageState extends State<MyHomePage> {
       print('Failed to fetch next prayer time: $e');
     }
 
+  }
+  Future<void> _loadAyah() async{
+    try{
+      final currentAyah = await APIHandler().getAyah();
+      setState(() {
+        _currentAyah = currentAyah;
+      });
+    }
+    catch (e){
+      print('Failed to get ayah: $e');
+    }
   }
 
   @override
@@ -167,7 +180,8 @@ class _MyHomePageState extends State<MyHomePage> {
               style: TextStyle(fontWeight: FontWeight.bold)
             )
           :
-          Text('No prayer time found.')
+          Text('No prayer time found.'),
+            Text(_currentAyah)
 
           ],
 
